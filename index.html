@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>Something Special for Faimah 🎁</title>
+  <meta name="description" content="A special birthday countdown for Faimah, from Mr. Aleem Ahmad Ghias" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Inter:wght@300;400;500;600&family=Dancing+Script:wght@400;600;700&display=swap"
+    rel="stylesheet" />
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --gold: #f5c842;
+      --rose: #ff6b9d;
+      --violet: #a855f7;
+      --deep: #0a0010;
+      --glow: rgba(245, 200, 66, 0.4);
+      --glass: rgba(255, 255, 255, 0.07);
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      min-height: 100vh;
+      background: var(--deep);
+      color: #fff;
+      font-family: 'Inter', sans-serif;
+      overflow-x: hidden;
+    }
+
+    #starCanvas,
+    #fireworkCanvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    #fireworkCanvas {
+      z-index: 2;
+      display: none;
+    }
+
+    .page {
+      position: relative;
+      z-index: 5;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px 16px;
+      text-align: center;
+    }
+
+    #passwordPage {
+      display: flex;
+      z-index: 50;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: var(--deep);
+    }
+
+    #countdownPage {
+      display: none;
+    }
+
+    #birthdayPage {
+      display: none;
+    }
+
+    .crown {
+      font-size: clamp(40px, 10vw, 72px);
+      margin-bottom: 12px;
+      animation: floatY 3s ease-in-out infinite;
+      filter: drop-shadow(0 0 18px var(--gold));
+    }
+
+    .sender-title {
+      font-family: 'Dancing Script', cursive;
+      font-size: clamp(1.1rem, 4vw, 1.7rem);
+      color: #d4b3ff;
+      margin-bottom: 6px;
+      letter-spacing: 0.02em;
+      text-shadow: 0 0 20px rgba(168, 85, 247, 0.6);
+    }
+
+    .main-title {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(1.6rem, 6vw, 3.2rem);
+      font-weight: 900;
+      line-height: 1.15;
+      margin-bottom: 10px;
+      background: linear-gradient(135deg, #f5c842, #ff6b9d, #a855f7, #f5c842);
+      background-size: 300% 300%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: gradientShift 5s ease infinite;
+    }
+
+    .sub-title {
+      font-size: clamp(0.85rem, 2.5vw, 1.1rem);
+      color: rgba(255, 255, 255, 0.55);
+      margin-bottom: 38px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .countdown-card {
+      background: var(--glass);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 24px;
+      padding: clamp(22px, 6vw, 48px) clamp(18px, 6vw, 52px);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      box-shadow: 0 8px 64px rgba(168, 85, 247, 0.2), 0 0 0 1px rgba(255, 255, 255, 0.05);
+      width: 100%;
+      max-width: 680px;
+      animation: cardGlow 4s ease-in-out infinite;
+    }
+
+    .timer-grid {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr auto 1fr auto 1fr;
+      gap: clamp(4px, 2vw, 16px);
+      margin-bottom: 28px;
+      align-items: center;
+    }
+
+    .time-block {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .time-number {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2.4rem, 9vw, 5.5rem);
+      font-weight: 900;
+      line-height: 1;
+      color: #fff;
+      text-shadow: 0 0 30px var(--gold), 0 0 60px rgba(245, 200, 66, 0.3);
+      transition: all 0.2s ease;
+    }
+
+    .time-number.tick {
+      transform: scale(1.06);
+      color: var(--gold);
+    }
+
+    .time-label {
+      font-size: clamp(0.55rem, 1.8vw, 0.75rem);
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: rgba(255, 255, 255, 0.45);
+      font-weight: 500;
+    }
+
+    .sep {
+      font-size: clamp(2rem, 7vw, 4rem);
+      color: var(--gold);
+      font-weight: 700;
+      animation: blink 1s step-end infinite;
+      text-shadow: 0 0 20px var(--gold);
+      line-height: 1;
+      padding-bottom: 24px;
+    }
+
+    .progress-wrap {
+      width: 100%;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 999px;
+      height: 6px;
+      overflow: hidden;
+      margin-bottom: 16px;
+    }
+
+    .progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, var(--violet), var(--rose), var(--gold));
+      border-radius: 999px;
+      transition: width 1s linear;
+      box-shadow: 0 0 12px var(--rose);
+    }
+
+    .progress-label {
+      font-size: 0.75rem;
+      color: rgba(255, 255, 255, 0.35);
+      letter-spacing: 0.05em;
+    }
+
+    .beep-btn {
+      margin-top: 22px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: rgba(255, 255, 255, 0.7);
+      border-radius: 999px;
+      padding: 8px 22px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.25s;
+      letter-spacing: 0.05em;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .beep-btn:hover {
+      background: rgba(255, 255, 255, 0.14);
+      color: #fff;
+    }
+
+    .hb-crown {
+      font-size: clamp(60px, 15vw, 120px);
+      animation: floatY 2s ease-in-out infinite;
+      filter: drop-shadow(0 0 30px var(--gold));
+      margin-bottom: 16px;
+    }
+
+    .hb-title {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2.4rem, 10vw, 7rem);
+      font-weight: 900;
+      line-height: 1.1;
+      background: linear-gradient(135deg, #f5c842, #ff6b9d, #a855f7, #00d4ff, #f5c842);
+      background-size: 400% 400%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: gradientShift 3s ease infinite;
+      margin-bottom: 10px;
+    }
+
+    .hb-subtitle {
+      font-family: 'Dancing Script', cursive;
+      font-size: clamp(1.1rem, 4vw, 2rem);
+      color: #d4b3ff;
+      margin-bottom: 40px;
+      text-shadow: 0 0 20px rgba(168, 85, 247, 0.8);
+    }
+
+    .emoji-rain {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 3;
+      overflow: hidden;
+    }
+
+    .emoji-rain span {
+      position: absolute;
+      top: -50px;
+      animation: emojifall linear infinite;
+      font-size: clamp(18px, 4vw, 30px);
+    }
+
+    .message-wrap {
+      width: 100%;
+      max-width: 780px;
+      margin: 0 auto;
+      padding: 0 16px 80px;
+      position: relative;
+      z-index: 10;
+    }
+
+    .message-card {
+      background: rgba(10, 0, 16, 0.85);
+      border: 1px solid rgba(245, 200, 66, 0.25);
+      border-radius: 24px;
+      padding: clamp(24px, 6vw, 52px);
+      backdrop-filter: blur(30px);
+      -webkit-backdrop-filter: blur(30px);
+      box-shadow: 0 0 80px rgba(168, 85, 247, 0.15), 0 0 0 1px rgba(255, 255, 255, 0.04);
+      text-align: left;
+      line-height: 1.9;
+    }
+
+    .message-card h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(1.3rem, 4vw, 2rem);
+      color: var(--gold);
+      margin-bottom: 20px;
+      text-align: center;
+      text-shadow: 0 0 20px var(--glow);
+    }
+
+    .message-card p {
+      font-size: clamp(0.9rem, 2.2vw, 1.05rem);
+      color: rgba(255, 255, 255, 0.88);
+      margin-bottom: 22px;
+    }
+
+    .stitle {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(1.1rem, 3vw, 1.5rem);
+      color: var(--rose);
+      margin: 36px 0 14px;
+      text-shadow: 0 0 15px rgba(255, 107, 157, 0.5);
+    }
+
+    .hl {
+      color: var(--gold);
+      font-style: italic;
+    }
+
+    .r {
+      color: var(--rose);
+    }
+
+    .v {
+      color: #c084fc;
+    }
+
+    .t {
+      color: #34d399;
+    }
+
+    .signature {
+      margin-top: 40px;
+      padding-top: 30px;
+      border-top: 1px solid rgba(245, 200, 66, 0.2);
+      text-align: center;
+    }
+
+    .signature p {
+      font-family: 'Dancing Script', cursive;
+      font-size: clamp(1.1rem, 3.5vw, 1.6rem);
+      color: var(--gold);
+      margin-bottom: 4px;
+      text-shadow: 0 0 20px var(--glow);
+    }
+
+    .ssig {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.78rem;
+      color: rgba(255, 255, 255, 0.4);
+      font-style: italic;
+    }
+
+    @keyframes floatY {
+
+      0%,
+      100% {
+        transform: translateY(0)
+      }
+
+      50% {
+        transform: translateY(-12px)
+      }
+    }
+
+    @keyframes gradientShift {
+      0% {
+        background-position: 0% 50%
+      }
+
+      50% {
+        background-position: 100% 50%
+      }
+
+      100% {
+        background-position: 0% 50%
+      }
+    }
+
+    @keyframes cardGlow {
+
+      0%,
+      100% {
+        box-shadow: 0 8px 64px rgba(168, 85, 247, 0.2)
+      }
+
+      50% {
+        box-shadow: 0 8px 80px rgba(245, 200, 66, 0.25)
+      }
+    }
+
+    @keyframes blink {
+
+      0%,
+      100% {
+        opacity: 1
+      }
+
+      50% {
+        opacity: 0
+      }
+    }
+
+    @keyframes emojifall {
+      0% {
+        transform: translateY(-50px) rotate(0deg);
+        opacity: 1
+      }
+
+      100% {
+        transform: translateY(110vh) rotate(360deg);
+        opacity: 0.3
+      }
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(40px)
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0)
+      }
+    }
+
+    .fin {
+      animation: fadeInUp 1.2s ease forwards;
+    }
+
+    @media(max-width:420px) {
+      .sep {
+        font-size: 1.5rem;
+        padding-bottom: 20px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <canvas id="starCanvas"></canvas>
+  <canvas id="fireworkCanvas"></canvas>
+  <div class="emoji-rain" id="emojiRain" style="display:none"></div>
+
+  <!-- PASSWORD PAGE -->
+  <div class="page" id="passwordPage">
+    <div class="countdown-card" style="text-align: center; max-width: 400px; padding: 40px 20px;">
+      <h2 style="font-family: 'Playfair Display', serif; color: var(--gold); margin-bottom: 20px; font-size: 1.8rem;">🔒
+        Enter Password</h2>
+      <input type="password" id="pwdInput" placeholder="Password"
+        style="width: 100%; padding: 12px 16px; margin-bottom: 20px; border-radius: 8px; border: 1px solid rgba(245,200,66,0.5); background: rgba(0,0,0,0.2); color: #fff; font-size: 16px; outline: none; font-family: 'Inter', sans-serif;" />
+      <button onclick="checkPwd()"
+        style="background: linear-gradient(90deg, var(--violet), var(--rose)); color: #fff; border: none; padding: 12px 24px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 16px; width: 100%; transition: opacity 0.2s;">Unlock</button>
+      <p id="pwdError" style="color: var(--rose); margin-top: 15px; display: none; font-size: 0.9rem;">Incorrect
+        password.</p>
+    </div>
+  </div>
+
+  <!-- COUNTDOWN PAGE -->
+  <div class="page" id="countdownPage">
+    <div class="crown">👑</div>
+    <p class="sender-title">✨ Mr. Aleem Ahmad Ghias is sending you something special ✨</p>
+    <h1 class="main-title">A Gift Wrapped in Time</h1>
+    <p class="sub-title">Counting down to a very special day &mdash; 20th July</p>
+    <div class="countdown-card">
+      <div class="timer-grid">
+        <div class="time-block">
+          <div class="time-number" id="days">00</div>
+          <div class="time-label">Days</div>
+        </div>
+        <div class="sep">:</div>
+        <div class="time-block">
+          <div class="time-number" id="hours">00</div>
+          <div class="time-label">Hours</div>
+        </div>
+        <div class="sep">:</div>
+        <div class="time-block">
+          <div class="time-number" id="minutes">00</div>
+          <div class="time-label">Minutes</div>
+        </div>
+        <div class="sep">:</div>
+        <div class="time-block">
+          <div class="time-number" id="seconds">00</div>
+          <div class="time-label">Seconds</div>
+        </div>
+      </div>
+      <div class="progress-wrap">
+        <div class="progress-bar" id="progressBar" style="width:0%"></div>
+      </div>
+      <div class="progress-label" id="progressLabel">Calculating&hellip;</div>
+      <button class="beep-btn" id="beepBtn" onclick="toggleBeep()">🎵 Enable Sound &amp; Music</button>
+    </div>
+  </div>
+
+  <!-- BIRTHDAY PAGE -->
+  <div class="page" id="birthdayPage">
+    <div class="hb-crown">🎂</div>
+    <h1 class="hb-title">Happy Birthday<br />Faimah! 🎉</h1>
+    <p class="hb-subtitle">&mdash; From your forever best friend &mdash;</p>
+    <div class="message-wrap">
+      <div class="message-card fin">
+        <h2>💌 A Letter From My Heart To Yours</h2>
+        <p>My dearest, most incredible, most irreplaceable <span class="hl">Faimah</span>,</p>
+        <p>Today is not just a birthday. Today is the anniversary of the universe making its single greatest decision
+          &mdash; bringing you into existence. And I, your best friend who has witnessed your brilliance, your laughter,
+          your tears, your courage, and every single messy beautiful moment in between, want you to know: <span
+            class="hl">the world is infinitely better because you are in it.</span></p>
+        <p>I have been drafting this letter in my heart for years &mdash; every time you made me laugh so hard I cried,
+          every time you held my hand without me asking, every time you said exactly the right thing at exactly the
+          right moment, I thought: <em>"One day I will write all of this down for her."</em> Well, today is that day. So
+          grab your coziest blanket, make yourself a cup of something warm, and let me pour every single feeling I have
+          ever felt about you onto these pages. Because you deserve every word, and honestly, fifty thousand words would
+          not be enough &mdash; but I will give it everything I have.</p>
+        <p>Do you remember the first time we actually talked? I do. I remember it the way you remember the first song
+          that ever made you cry &mdash; not just the melody but the exact quality of light in the room, the feeling in
+          the air, the way time seemed to slow down and say: <em>pay attention, this one matters.</em></p>
+        <p>You walked in, and I do not know how to explain this without sounding dramatic, but you were
+          <em>different.</em> There was this warmth around you that was not just warmth &mdash; it was safety. The kind
+          that does not announce itself, the kind that just quietly rearranges the air so that breathing becomes easier.
+          I felt it immediately. I thought: this girl is going to mean something to me. And I was right. You mean
+          everything.
+        </p>
+        <p>Within hours of knowing you, I had already told you something I had never told anyone. Do you know how rare
+          that is? Most people spend years building walls. You did not even give me time to pick up the bricks. You
+          walked into my life and somehow, effortlessly, all the things I had been guarding just relaxed. That is a
+          gift, Faimah. That is a deeply rare, deeply precious gift &mdash; the ability to make someone feel so seen, so
+          accepted, so genuinely welcomed, that their defenses simply dissolve. You have that. You have always had that.
+        </p>
+        <p>And in that moment, without knowing it, without any ceremony or announcement, we became friends. Not the kind
+          of friends who float in and out of each other's lives. The kind who anchor each other. The kind who become a
+          permanent fixture in each other's story. The <em>forever</em> kind.</p>
+
+        <p class="stitle">🌟 What You Do Not Know About Yourself</p>
+        <p>Here is the thing about you, Faimah: you have absolutely no idea how extraordinary you are. You walk through
+          the world thinking you are ordinary &mdash; maybe even less than ordinary on your hard days &mdash; and it
+          takes every ounce of restraint I have not to grab your shoulders and say: <em>WAKE UP. Do you not see
+            yourself?!</em></p>
+        <p>Let me describe what I see when I look at you, since clearly your mirror has been giving you wrong
+          information.</p>
+        <p>I see someone who has been through storms that would have flattened lesser people &mdash; and you not only
+          survived them, you emerged with your heart still open. That is not luck. That is an almost supernatural level
+          of resilience paired with a choice &mdash; a daily, deliberate, courageous choice &mdash; to stay soft, to
+          stay kind, to not let the hard things harden you. Do you know how difficult that is? Most people, after what
+          you have been through, would have built walls ten feet thick. You kept the door open. You kept choosing love.
+          You kept choosing light.</p>
+        <p>I see someone with a mind that works in ways that leave me breathless. The way you connect things &mdash;
+          ideas, people, emotions, patterns &mdash; it is like you see the world in four dimensions when the rest of us
+          are stuck in three. You notice things other people miss. You feel things others skim past. You ask questions
+          that make people pause mid-sentence and reconsider everything. You make ordinary afternoons feel significant.
+          That is not something you can teach. That is just you.</p>
+        <p>I see someone whose kindness is not the passive, keep-the-peace kind. Your kindness is active and
+          intentional. It shows up. It makes phone calls at 2 AM. It saves the last piece of dessert. It remembers the
+          small things that matter to people. It checks in a week after everyone else has moved on. It sits quietly
+          beside someone who is hurting and does not try to fix it &mdash; it just <em>stays.</em> That kind of kindness
+          is rare. And it has changed more lives than you will ever know.</p>
+        <p>I see someone who is funny &mdash; genuinely, brilliantly, effortlessly funny. Not the trying-too-hard kind.
+          The kind that catches you off guard and makes you laugh from somewhere deep and real. The kind that finds
+          absurdity in serious situations and reminds everyone that life still has room for joy. Your sense of humor is
+          one of my favorite things in this entire world. I have laughed harder with you than I have laughed with almost
+          anyone else.</p>
+        <p>I see someone beautiful &mdash; not just on the outside, though you are undeniably beautiful there too.
+          Beautiful in the way that matters more and lasts longer. Beautiful in character. In warmth. In authenticity.
+          In the way you treat people. In the way your face changes when something genuinely delights you. That kind of
+          beauty does not fade. That kind of beauty compounds with time.</p>
+
+        <p class="stitle">💫 The Moments That Made Us</p>
+        <p>Best friendships are not built in grand gestures. They are built in the small moments that accumulate over
+          time into something immovable. Let me tell you about some of ours.</p>
+        <p>The late nights. Oh, the late nights. When it is past midnight and the world is quiet and we are still
+          talking &mdash; not because we have to, but because neither of us wants to stop. Those conversations go
+          everywhere &mdash; to the deepest questions about life and the most ridiculous hypotheticals and the most
+          vulnerable confessions and the most absurd jokes. Those conversations are a treasure. I have kept pieces of
+          them pressed in my memory like flowers in a book &mdash; preserved, precious, permanent.</p>
+        <p>The times you showed up when I needed you. Not when I asked. You often showed up before I even knew I needed
+          you, before I had words for what I was feeling. You have this radar for the people you love. You sense things.
+          You show up. And when you show up, you bring yourself fully &mdash; not distracted, not half-present, but
+          <em>there.</em> Completely, warmly, wholly there. There is nothing more comforting than knowing someone is
+          truly present with you.
+        </p>
+        <p>The adventures &mdash; big and small. The unplanned detours that became the best parts of trips. The
+          spontaneous decisions that turned into stories we are still telling. The times we got completely lost and
+          laughed about it until our sides hurt. The times we sat in comfortable, easy silence that felt as full and
+          warm as any conversation. Adventures with you are different because everything is more vivid with you around.
+          Colors are brighter. Food tastes better. Music hits harder. The whole world turns up its own volume.</p>
+        <p>The hard times. The times we sat with each other in the middle of the mess, when life was painful and
+          confusing and neither of us had answers, but we had each other. Those moments &mdash; quiet, heavy, honest
+          &mdash; are when I understood what a true friendship really is. It is not about being there for the highlight
+          reel. It is about showing up for the behind-the-scenes footage, the raw and real moments that most people
+          never get to see. You have never once flinched from my mess. And I hope I have never flinched from yours.</p>
+        <p>The celebrations. The times we screamed and jumped and cried happy tears over each other's wins &mdash; the
+          big ones and the quiet ones that only we understood the significance of. You have celebrated me the way I
+          always wanted to be celebrated: not with envy or half-hearted congratulations, but with a joy that is
+          completely, genuinely about me. And I have tried my best to do the same for you. Because your victories are my
+          victories. Your joy is my joy. That is what it means to truly love someone.</p>
+
+        <p class="stitle">🎀 What Being Your Friend Has Given Me</p>
+        <p>People talk about what they give their friends, but I want to talk about what you have given me, because the
+          list is long and it deserves to be said out loud.</p>
+        <p>You gave me <span class="r">permission to be myself.</span> Completely. Without editing or apologizing or
+          shrinking. Being around you taught me that I do not have to be smaller to make others comfortable. You have
+          always met the full version of me with enthusiasm, not tolerance. There is a profound difference between
+          someone who tolerates who you are and someone who <em>celebrates</em> who you are. You have always, without
+          exception, been in the celebration camp.</p>
+        <p>You gave me <span class="v">courage.</span> Your brand of courage is quiet but contagious. Watching you face
+          things that terrified you &mdash; not without fear, but in spite of it &mdash; has shown me what bravery looks
+          like. It does not look like someone who is not scared. It looks like someone who is scared and does it anyway.
+          I have learned what courage looks like by watching you live it every single day.</p>
+        <p>You gave me <span class="t">perspective.</span> Whenever I have been caught in my own head, you have a way of
+          gently expanding my view. You help me see things from angles I had not considered. You challenge me without
+          dismissing me. You question me without judging me. That kind of honest, loving perspective is worth more than
+          any advice column ever written.</p>
+        <p>You gave me <span class="hl">joy.</span> Pure, uncomplicated, unearned joy. The kind that does not need a
+          reason. The kind that bubbles up just because you are there. Because you said something that made everyone
+          erupt. Because you looked at me with that look &mdash; the one that means you are thinking the exact same
+          thing I am &mdash; and suddenly everything feels lighter. Joy with you is the best kind. It is easy. It is
+          constant. It is real.</p>
+        <p>You gave me <span class="r">a model for love.</span> The love that means I want good things for you more than
+          I want anything for myself. The love that means your happiness genuinely makes me happy &mdash; not
+          performatively, in a real, physical, warming-in-my-chest way. The love that means I will always, always be in
+          your corner. No matter what. No exceptions. No expiration date. Ever.</p>
+        <p>You gave me <span class="v">home.</span> Not a place but a feeling. The feeling of being completely yourself
+          somewhere. The feeling of being safe and accepted and wanted exactly as you are. You gave me that feeling. You
+          are that feeling. And there is no greater gift one person can give another.</p>
+
+        <p class="stitle">🌺 On Your Strength</p>
+        <p>I need to talk about your strength, Faimah, because I do not think you give yourself nearly enough credit for
+          it, and today of all days, it needs to be said clearly.</p>
+        <p>There have been times in your life &mdash; and you know which ones I mean &mdash; where you demonstrated
+          something I can only describe as extraordinary grace under pressure. You have faced things that would have
+          broken many people, and I watched you, slowly, painstakingly, pull yourself through. Not unscathed. Not
+          without scars. But <em>through.</em> Always through.</p>
+        <p>And the miraculous part &mdash; the part that never ceases to astonish me &mdash; is that you come through
+          with your heart still intact. Still warm. Still open to love. Still choosing to believe in people and life and
+          the possibility of good things. After everything. After all of it. That is not just strength. That is a form
+          of heroism.</p>
+        <p>I know you do not see yourself as brave. On your harder days, I know you feel fragile and uncertain. I know
+          the weight of your self-doubt because you have trusted me with it. So let me be clear: <span
+            class="hl">feeling fragile does not mean you are fragile.</span> You can be soft and strong simultaneously.
+          You can be scared and still be the bravest person in the room. All of those things are true of you at once.
+        </p>
+        <p>Your strength does not look like armor. It looks like showing up anyway. It looks like being honest when
+          hiding would be easier. It looks like asking for help when everything in you wants to handle it alone. It
+          looks like forgiving &mdash; yourself and others &mdash; even when forgiveness costs something real. That is
+          what real strength looks like. Not invincibility. Humanity. Beautiful, profound, resilient humanity. And you
+          have it in abundance.</p>
+        <p>I have watched you carry things that were not yours to carry, and still show up for others. I have watched
+          you rebuild yourself after losses that would have flattened me. I have watched you choose joy on days when
+          sadness would have been completely justified. Every time, without fail, I am in awe of you. Every single time.
+        </p>
+
+        <p class="stitle">✨ Things I Love Most About You</p>
+        <p>This list is incomplete because finishing it would require many more pages. But here are my very favorites
+          &mdash; the ones that come to mind immediately, without even having to think:</p>
+        <p>The way you laugh &mdash; not the polite laugh, the real one. The one that takes over your whole body and
+          makes everyone around you start laughing too, not because anything is even that funny anymore, but because
+          your laughter is so genuinely contagious it becomes its own reason.</p>
+        <p>The way you listen. Not just hearing &mdash; <em>listening.</em> The way you give your full attention to
+          someone speaking. The way you respond in a way that shows you actually absorbed what was said. People feel
+          heard around you. That is a rare and precious skill, and you have it in abundance.</p>
+        <p>The way you love the people you love. Fiercely. Completely. Without half-measures. When you care about
+          someone, you care about <em>them</em> &mdash; their struggles and their joys, their weird quirks and their
+          biggest dreams. You invest fully. You show up consistently. You remember the details. You make people feel
+          like they matter, because to you, they genuinely do.</p>
+        <p>Your curiosity. The way you are interested in things &mdash; genuinely curious about the world, about ideas,
+          about people. You ask good questions. You actually want to know the answer. You make any conversation
+          something worth having. You make learning feel exciting.</p>
+        <p>Your honesty. Not the brutal kind that masquerades as honesty. The gentle, courageous kind. The kind that
+          tells you what you need to hear, but does it with so much care that you can actually receive it. The kind that
+          trusts you enough to be real with you even when it is uncomfortable. That kind of honesty is the backbone of a
+          real friendship.</p>
+        <p>Your sensitivity. I know you sometimes see it as a flaw &mdash; feeling things so deeply, being moved by
+          things others brush past. But your sensitivity is not a weakness. It is why you understand people so
+          intuitively. It is why your empathy is so genuine. It is why you can hold space for someone's pain in a way
+          that actually helps them feel less alone. Your sensitivity is the source of some of your most extraordinary
+          gifts.</p>
+        <p>The way you make ordinary things extraordinary. A coffee run with you is an adventure. A random Tuesday
+          afternoon becomes a memory worth keeping. You bring an energy that elevates everything around you, not because
+          you are performing, but because that is just who you are. Life is more vivid in your company. Always.</p>
+
+        <p class="stitle">💖 What I Wish For You This Year</p>
+        <p>On your birthday, it feels right to look forward. To name the things I hope for you, the things I wish into
+          existence for you with everything I have.</p>
+        <p>I wish you <span class="hl">peace.</span> The deep, settled kind. The kind that does not depend on everything
+          going right. The kind that lives in your chest like a warm steady light regardless of what is happening around
+          you. Peace that says: <em>whatever comes, I will be okay.</em> Peace that comes from knowing your own worth,
+          from trusting yourself, from letting go of things that were never yours to carry.</p>
+        <p>I wish you <span class="r">joy that is big and frequent and surprising.</span> The kind that sneaks up on you
+          on random days when you were not expecting it. Joy from the small things &mdash; a perfect song at the right
+          moment, a sky that stops you in your tracks, a conversation that fills you up, a moment of pure ridiculous
+          fun. I want your life overflowing with those moments.</p>
+        <p>I wish you <span class="v">love in every form.</span> Love from people who see you clearly and choose you
+          loudly and consistently. Love that challenges you to grow without making you feel inadequate. Love that laughs
+          with you and sits beside you in the quiet. Love that is just <em>there,</em> steady and unconditional. You
+          deserve to be loved the way you love others. Completely. Wholeheartedly. For real.</p>
+        <p>I wish you <span class="t">adventures.</span> Big ones and small ones. The ones you plan and the ones that
+          happen to you. New places, new experiences, new versions of yourself that you discover only by doing something
+          you have never done before. I want you to go places that take your breath away. I want you to say yes when
+          fear whispers no.</p>
+        <p>I wish you <span class="hl">confidence.</span> The quiet, rooted kind. Confidence to take up space without
+          apologizing. Confidence to say what you think and feel and need. Confidence to pursue what you want without
+          apologizing for wanting it. Confidence to believe that your voice deserves to be heard, that your presence is
+          genuinely valuable and wanted and loved.</p>
+        <p>I wish you <span class="r">rest.</span> Real rest. The kind where you put down every weight you have been
+          carrying and just breathe. Time to be gentle with yourself. Time to recover when life gets hard. Time to
+          celebrate when life is good. You deserve to actually live the life you are building, not just rush through it.
+        </p>
+        <p>And most of all, I wish you <span class="hl">us.</span> Decades more of our friendship, our inside jokes, our
+          honest conversations, our adventures, our late nights that go everywhere at once. I wish us years and years of
+          choosing each other, of growing up without growing apart, of being each other's constants through every
+          changing landscape life takes us through. Because you are one of the great loves of my life. Truly. And I
+          cannot imagine the person I would be without you in it.</p>
+
+        <p class="stitle">🌙 What You Have Taught Me</p>
+        <p>Here is a partial accounting of the lessons you have given me, mostly without realizing you were teaching
+          anything at all.</p>
+        <p>You taught me that <span class="hl">being soft is not the same as being weak.</span> That you can be gentle
+          and tender and deeply emotional and still be the most resilient, capable, formidable person in the room. You
+          walk through the world with open hands and an open heart and you have shown me that this is not naivety
+          &mdash; it is a deeply considered, deliberate choice, and it takes more courage than any armor ever could.</p>
+        <p>You taught me that <span class="r">the quality of your presence matters more than the quantity of your
+            words.</span> There are times you have sat with me and said almost nothing and it was exactly what I needed.
+          There are times you have said one sentence &mdash; just one &mdash; that reached into the exact center of what
+          I was feeling and named it and held it, and I felt less alone in an instant.</p>
+        <p>You taught me that <span class="v">you can love someone completely without needing them to be perfect.</span>
+          You have seen me at my worst &mdash; my selfishness, my pettiness, my harder edges &mdash; and you loved me
+          through all of it. Not despite those things. Through them. That unconditional quality of your love has taught
+          me to extend the same grace to others.</p>
+        <p>You taught me to <span class="t">find the funny.</span> In everything. In the disasters and the
+          embarrassments and the frustrations &mdash; there is almost always something genuinely funny if you are
+          willing to look for it. You look for it instinctively. You find it and you laugh and suddenly everything
+          becomes lighter.</p>
+        <p>You taught me that <span class="hl">good friendships require intentional effort.</span> Not the exhausting
+          kind where you are performing &mdash; the loving kind, where you show up and check in and remember and follow
+          through. You taught me to be intentional about love. And that lesson has made every relationship in my life
+          richer.</p>
+        <p>You taught me that <span class="r">healing is not linear,</span> and that is okay. I have watched you have
+          hard days after what felt like breakthroughs, and then breakthrough days that came out of nowhere. You have
+          never pretended that progress is a straight line. And watching you be honest about that has given me
+          permission to be honest about my own messy, nonlinear healing too. That is a gift beyond measure.</p>
+
+        <p class="stitle">🎊 A Birthday Toast &mdash; To You, Faimah</p>
+        <p>So here we are. Another year. Another beautiful, incredible lap around the sun for the most remarkable person
+          I know.</p>
+        <p>I want to raise a glass &mdash; raise yours too if you are reading this &mdash; to <span
+            class="hl">Faimah.</span></p>
+        <p>To the girl who walked into my life and rearranged it completely for the better. To the woman who has grown,
+          year by year, into someone more and more herself &mdash; more confident, more wise, more settled in who she
+          is, more beautiful in the truest sense of that word. To the friend who has never once made me feel like a
+          burden. To the person who laughs loudest, loves deepest, and lives with more heart than almost anyone I have
+          ever had the privilege of knowing.</p>
+        <p>To every year behind you &mdash; thank you for surviving them all. For learning from them. For carrying what
+          mattered and releasing what did not. For becoming who you are today because of and in spite of every single
+          one of them.</p>
+        <p>To every year ahead of you &mdash; may they be outrageously good. May they surprise you in wonderful ways.
+          May they bring you people who truly deserve you, experiences that expand you, and enough peace that the good
+          things actually land instead of rushing past unnoticed.</p>
+        <p>And to today &mdash; to this birthday, this specific day &mdash; may you feel it. May you let yourself feel
+          celebrated and loved and seen and cherished. May you receive all the warmth that is coming at you without
+          deflecting it or minimizing it. May you let it in. You deserve every single bit of it. Every last drop.</p>
+        <p>You are <span class="hl">extraordinary, Faimah.</span> You are one of the best people I have ever known. And
+          knowing you &mdash; really, truly knowing you &mdash; has been one of the great privileges and greatest joys
+          of my entire life.</p>
+        <p>Happy Birthday, my love. May this be the year everything beautiful you have been working toward finally,
+          gloriously starts to bloom.</p>
+        <p>I love you. Endlessly. Shamelessly. Completely. Forever and then some.</p>
+
+        <p class="stitle">🌷 One Last Thing...</p>
+        <p>I know you are going to finish reading this and feel a little overwhelmed and maybe a little emotional and
+          you are going to want to dismiss it &mdash; to say "this is too much" or "I am not all of that" &mdash;
+          because receiving love gracefully is genuinely hard, especially for people who are so much better at giving it
+          than accepting it.</p>
+        <p>So before you do that, I want to say one last thing:</p>
+        <p><span class="hl">This is not an exaggeration. This is not flattery. This is just the truth.</span></p>
+        <p>I have known you. Really known you. I have seen you in your glory and in your mess, in your confidence and in
+          your self-doubt, in your funniest moments and your most broken ones. And after all of that &mdash; after
+          seeing all of it &mdash; I chose to write every single word of this. Because every word is true.</p>
+        <p>You are loved, Faimah. Deeply. Thoroughly. For exactly who you are, right now, on this birthday, in this
+          season of your life, with everything you are carrying and everything you are building and everything you are
+          still beautifully figuring out.</p>
+        <p>You are loved. You have always been loved. You will always be loved.</p>
+        <p>Now go celebrate yourself the way you deserve. Completely. Unapologetically. Today is yours. 🎂💛🌸</p>
+
+        <div class="signature">
+          <p>With every piece of my heart,</p>
+          <p>Your Best Friend &mdash; Always &amp; Forever 💖</p>
+          <p class="ssig">&mdash; and from the man whose love made this possible,<br />Mr. Aleem Ahmad Ghias, who knew
+            exactly how special you are 🎁</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let TARGET, START_REF, TOTAL_SECS;
+
+    function checkPwd() {
+      const pwd = document.getElementById('pwdInput').value;
+      if (pwd === 'fatima12345' || pwd === 'dev12345') {
+        document.getElementById('passwordPage').style.display = 'none';
+        document.getElementById('countdownPage').style.display = 'flex';
+        initApp(pwd);
+      } else {
+        document.getElementById('pwdError').style.display = 'block';
+      }
+    }
+
+    // STARS
+    (function () {
+      const c = document.getElementById('starCanvas'), cx = c.getContext('2d'); let W, H, stars = [];
+      function resize() { W = c.width = window.innerWidth; H = c.height = window.innerHeight; stars = Array.from({ length: 200 }, () => ({ x: Math.random() * W, y: Math.random() * H, r: Math.random() * 1.6 + 0.2, o: Math.random(), sp: Math.random() * 0.008 + 0.002 })); }
+      function draw() { cx.clearRect(0, 0, W, H); stars.forEach(s => { s.o += s.sp; if (s.o > 1) s.o = 0; cx.beginPath(); cx.arc(s.x, s.y, s.r, 0, Math.PI * 2); cx.fillStyle = 'rgba(255,255,255,' + Math.abs(Math.sin(s.o * Math.PI)) + ')'; cx.fill(); }); requestAnimationFrame(draw); }
+      resize(); window.addEventListener('resize', resize); draw();
+    })();
+
+    // FIREWORKS
+    const fwC = document.getElementById('fireworkCanvas'), fwX = fwC.getContext('2d');
+    let fwOn = false, parts = [];
+    function rsz() { fwC.width = window.innerWidth; fwC.height = window.innerHeight; }
+    window.addEventListener('resize', rsz); rsz();
+    class Pt { constructor(x, y, col) { this.x = x; this.y = y; this.col = col; const a = Math.random() * Math.PI * 2, s = Math.random() * 6 + 2; this.vx = Math.cos(a) * s; this.vy = Math.sin(a) * s; this.al = 1; this.dc = Math.random() * 0.015 + 0.01; this.g = 0.12; this.sz = Math.random() * 3 + 1; } upd() { this.x += this.vx; this.y += this.vy; this.vy += this.g; this.vx *= 0.98; this.al -= this.dc; } drw(ctx) { ctx.save(); ctx.globalAlpha = this.al; ctx.fillStyle = this.col; ctx.shadowBlur = 12; ctx.shadowColor = this.col; ctx.beginPath(); ctx.arc(this.x, this.y, this.sz, 0, Math.PI * 2); ctx.fill(); ctx.restore(); } }
+    function launch() { const cols = ['#f5c842', '#ff6b9d', '#a855f7', '#00d4ff', '#34d399', '#fb7185', '#fbbf24', '#60a5fa']; const x = Math.random() * fwC.width, y = Math.random() * fwC.height * 0.6, col = cols[Math.floor(Math.random() * cols.length)]; for (let i = 0; i < 90; i++)parts.push(new Pt(x, y, col)); }
+    function animFW() { if (!fwOn) return; fwX.fillStyle = 'rgba(10,0,16,0.18)'; fwX.fillRect(0, 0, fwC.width, fwC.height); parts = parts.filter(p => p.al > 0.05); parts.forEach(p => { p.upd(); p.drw(fwX); }); if (Math.random() < 0.04) launch(); requestAnimationFrame(animFW); }
+    function startFW() { fwC.style.display = 'block'; fwOn = true; animFW(); for (let i = 0; i < 8; i++)setTimeout(launch, i * 180); }
+
+    // EMOJI RAIN
+    function startEmoji() { const r = document.getElementById('emojiRain'); r.style.display = 'block'; const e = ['🎉', '🎊', '🎂', '🌸', '💖', '✨', '🌟', '🎈', '💜', '🌺', '🦋', '💫', '🎀']; for (let i = 0; i < 35; i++) { const s = document.createElement('span'); s.textContent = e[Math.floor(Math.random() * e.length)]; s.style.left = Math.random() * 100 + '%'; s.style.animationDuration = (Math.random() * 6 + 4) + 's'; s.style.animationDelay = (Math.random() * 6) + 's'; r.appendChild(s); } }
+
+    // AUDIO
+    let aCtx = null, beepOn = false;
+    function getCtx() { if (!aCtx) aCtx = new (window.AudioContext || window.webkitAudioContext)(); return aCtx; }
+    function beep(f, dur, type, g) { if (!beepOn) return; const c = getCtx(), o = c.createOscillator(), gn = c.createGain(); o.connect(gn); gn.connect(c.destination); o.type = type || 'sine'; o.frequency.value = f || 660; gn.gain.setValueAtTime(g || 0.18, c.currentTime); gn.gain.exponentialRampToValueAtTime(0.001, c.currentTime + (dur || 0.07)); o.start(c.currentTime); o.stop(c.currentTime + (dur || 0.07)); }
+
+    const audioBefore = new Audio('assets/before.mp3');
+    audioBefore.loop = true;
+    const audioAfter = new Audio('assets/after.mp3');
+
+    function toggleBeep() { getCtx().resume(); beepOn = !beepOn; const btn = document.getElementById('beepBtn'); if (beepOn) { btn.innerHTML = '🎵 Sound On'; btn.style.borderColor = 'rgba(245,200,66,0.5)'; btn.style.color = '#f5c842'; audioBefore.play().catch(e => console.log(e)); beep(880, 0.12, 'sine', 0.25); } else { btn.innerHTML = '🔇 Sound Off'; btn.style.borderColor = ''; btn.style.color = ''; audioBefore.pause(); } }
+
+    // COUNTDOWN
+    const eD = document.getElementById('days'), eH = document.getElementById('hours'), eM = document.getElementById('minutes'), eS = document.getElementById('seconds'), ePB = document.getElementById('progressBar'), ePL = document.getElementById('progressLabel');
+    function p2(n) { return String(n).padStart(2, '0'); }
+    function tick(el) { el.classList.remove('tick'); void el.offsetWidth; el.classList.add('tick'); setTimeout(() => el.classList.remove('tick'), 200); }
+    let prevS = -1, iv;
+    function update() {
+      const now = new Date(), diff = TARGET - now;
+      if (diff <= 0) { showBD(); return; }
+      const tot = Math.floor(diff / 1000), d = Math.floor(tot / 86400), h = Math.floor((tot % 86400) / 3600), m = Math.floor((tot % 3600) / 60), s = tot % 60;
+      if (s !== prevS) { if (prevS !== -1) { tick(eS); if (s === 59) tick(eM); if (s === 59 && m === 59) tick(eH); if (s === 59 && m === 59 && h === 23) tick(eD); beep(s === 0 ? 880 : 660, s === 0 ? 0.12 : 0.06); } prevS = s; }
+      eD.textContent = p2(d); eH.textContent = p2(h); eM.textContent = p2(m); eS.textContent = p2(s);
+      const pct = Math.min(100, ((TOTAL_SECS - tot) / TOTAL_SECS) * 100);
+      ePB.style.width = pct.toFixed(3) + '%';
+      ePL.textContent = d + 'd ' + p2(h) + 'h ' + p2(m) + 'm ' + p2(s) + 's remaining — ' + pct.toFixed(1) + '% of the wait is complete';
+    }
+    function showBD() { clearInterval(iv); document.getElementById('countdownPage').style.display = 'none'; document.getElementById('birthdayPage').style.display = 'flex'; startFW(); startEmoji(); const c = getCtx();[523.25, 659.25, 783.99, 1046.5].forEach((f, i) => setTimeout(() => beep(f, 0.4, 'sine', 0.3), i * 200)); audioBefore.pause(); audioAfter.play().catch(e => console.log(e)); }
+
+    function initApp(pwd) {
+      if (pwd === 'dev12345') {
+        TARGET = new Date(Date.now() + 10000); // 10 seconds from now
+        START_REF = new Date();
+        TOTAL_SECS = 10;
+      } else {
+        TARGET = new Date('2026-07-20T00:00:00');
+        START_REF = new Date('2026-07-01T00:00:00');
+        TOTAL_SECS = Math.floor((TARGET - START_REF) / 1000);
+      }
+      update();
+      iv = setInterval(update, 1000);
+      if (new Date() >= TARGET) showBD();
+    }
+
+    // Allow enter key in password input
+    document.getElementById('pwdInput').addEventListener('keypress', function (e) {
+      if (e.key === 'Enter') {
+        checkPwd();
+      }
+    });
+
+  </script>
+</body>
+
+</html>
