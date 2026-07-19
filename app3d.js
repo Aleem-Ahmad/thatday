@@ -120,9 +120,17 @@ let exhaustSystems=[];
 let raycaster,mouse;
 let clickableObjects=[];
 let threeRunning=false;
+function getAdaptiveRadius(baseRadius){
+  const aspect=window.innerWidth/window.innerHeight;
+  if(aspect<1){
+    return Math.min(baseRadius*2.0,baseRadius/(aspect*0.95));
+  }
+  return baseRadius;
+}
+
 let orbitState={
-  theta:0,phi:1.35,radius:9.5,y:1.5,z:0,
-  targetTheta:0,targetPhi:1.35,targetRadius:9.5,targetY:1.5,targetZ:0,
+  theta:0,phi:1.35,radius:getAdaptiveRadius(9.5),y:1.5,z:0,
+  targetTheta:0,targetPhi:1.35,targetRadius:getAdaptiveRadius(9.5),targetY:1.5,targetZ:0,
   isDragging:false,autoRotate:false
 };
 
@@ -579,6 +587,11 @@ function onWindowResize(){
   camera.aspect=window.innerWidth/window.innerHeight;
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth,window.innerHeight);
+  if(trunkOpened){
+    orbitState.targetRadius=getAdaptiveRadius(4.8);
+  }else{
+    orbitState.targetRadius=getAdaptiveRadius(9.5);
+  }
 }
 
 function getMouseNDC(e){
@@ -618,15 +631,18 @@ function handleTrunkClick(){
   const gameHud=document.getElementById('gameHud');
   if(gameHud&&!document.getElementById('blowBtn')){
     const btnCont=document.createElement('div');
-    Object.assign(btnCont.style,{position:'absolute',bottom:'90px',width:'100%',
-      textAlign:'center',zIndex:'100',pointerEvents:'none'});
+    Object.assign(btnCont.style,{
+      position:'absolute',bottom:'90px',width:'100%',
+      display:'flex',justifyContent:'center',alignItems:'center',flexWrap:'wrap',
+      gap:'8px',padding:'0 10px',zIndex:'100',pointerEvents:'none'
+    });
 
     const mkBtn=(id,txt,handler,bg)=>{
       const b=document.createElement('button');
       b.id=id;b.innerHTML=txt;b.style.display='none';
       Object.assign(b.style,{
-        padding:'15px 32px',margin:'4px',borderRadius:'30px',background:bg,
-        color:'#fff',fontWeight:'800',fontSize:'1rem',border:'none',cursor:'pointer',
+        padding:'12px 24px',margin:'0',borderRadius:'30px',background:bg,
+        color:'#fff',fontWeight:'800',fontSize:'0.9rem',border:'none',cursor:'pointer',
         pointerEvents:'auto',boxShadow:'0 8px 25px rgba(0,0,0,0.4)',
         fontFamily:'Montserrat,sans-serif',letterSpacing:'.04em',
         textShadow:'0 1px 3px rgba(0,0,0,.4)',transition:'transform .2s'
@@ -662,7 +678,7 @@ function handleTrunkClick(){
   clickableObjects=clickableObjects.filter(o=>o.name!=='TRUNK_LID'&&o.name!=='TRUNK_BTN');
 
   orbitState.targetPhi=0.52;
-  orbitState.targetRadius=4.8;
+  orbitState.targetRadius=getAdaptiveRadius(4.8);
   orbitState.targetY=0.65;
   orbitState.targetZ=1.85;
 
@@ -775,7 +791,7 @@ function replayExperience(){
   const btnHud=document.getElementById('openTrunkHudBtn');if(btnHud)btnHud.style.display='block';
   ['blowBtn','cutBtn','letterBtn','giftBtn'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='none';});
   if(trunkLid){trunkLid.children.forEach(c=>{if(c.name==='TRUNK_LID')clickableObjects.push(c);});}
-  orbitState.targetPhi=1.35;orbitState.targetRadius=9.5;orbitState.targetY=1.5;orbitState.targetZ=0;
+  orbitState.targetPhi=1.35;orbitState.targetRadius=getAdaptiveRadius(9.5);orbitState.targetY=1.5;orbitState.targetZ=0;
   setHint('\uD83D\uDE97 Tap the button below to open the Birthday Surprise!');updateSteps();
 }
 
